@@ -2,7 +2,6 @@ class Board:
     def __init__(self, *args):
         super(Board, self).__init__(*args)
         
-        
 
 class Slot:
     def __init__(self, *args):
