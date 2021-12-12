@@ -1,15 +1,40 @@
 import math
 
 class Game:
-    def __init__(self, player1_type, player2_type):
+    def __init__(self):
         self.board = Board()
-        self.white_player = Player("w", self.board, player1_type)
-        self.black_player = Player("b", self.board, player2_type)
-        self.curr_turn = 1
+        self.white_player = Player("w", self.board)
+        self.black_player = Player("b", self.board)
+        self._curr_turn = 1
         self.furthest_turn = 1
+        self.directions = {
+            "s": [1, 0],
+            "se": [1, 1],
+            "e": [0, 1],
+            "ne": [-1, 1],
+            "n": [-1, 0],
+            "nw": [-1, -1],
+            "w": [0, -1],
+            "sw": [1, -1]
+        }
 
     def get_turn(self):
         return self._curr_turn
+
+    def move(self, worker_letter, direction_str):
+        if worker_letter == "A":
+            worker = self.white_player.workers[0]
+        elif worker_letter == "B":
+            worker = self.white_player.workers[1]
+        elif worker_letter == "Y":
+            worker = self.white_player.workers[1]
+        else:
+            player = self.black_player
+
+        
+
+    def build(self, worker, direction):
+        pass
 
 class Board:
     def __init__(self):
@@ -18,7 +43,7 @@ class Board:
         for i in range(5):
             row = []
             for j in range(5):
-                row.append(Slot(i, j))
+                row.append(Slot(i + 1, j + 1))
             self.slots.append(row)
 
     def __repr__(self):
@@ -42,8 +67,8 @@ class Board:
 
 class Slot:
     def __init__(self, row, col, worker = 0):
-        self.row = row + 1
-        self.col = col + 1
+        self.row = row
+        self.col = col
         self.level = 0
         self.worker = worker
 
@@ -62,9 +87,8 @@ class Worker:
         return self.name
 
 class Player:
-    def __init__(self, color, board, player_type):
+    def __init__(self, color, board):
         self.color = color
-        self.player_type = player_type
 
         if color == "w":
             self.workers = []
@@ -83,5 +107,5 @@ class Player:
             self.workers.append(w2)
             board.slots[3][3].worker = w2
 
-# board = Board()  
-# print(board)
+game = Game()  
+print(game.board)
