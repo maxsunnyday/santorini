@@ -1,16 +1,19 @@
 from santorini_game import *
+
 class OwnerError(Exception):
     pass
+
 class SantoriniCLI:
     """Display board and prompt a move"""
     def __init__(self, player1="human", player2="human"):
-        self.game = Game('human', 'human')
+        self.game = Game()
         self._player1_type = player1
         self._player2_type = player2
             
     def run(self):
         while True:
             print(self.game.board)
+            # check if game is over
             # fetch current turn number
             curr_turn = self.game.get_turn()
             # if odd, white moves. if even, blue moves.
@@ -20,6 +23,8 @@ class SantoriniCLI:
             else:
                 print("Turn: {}, blue (XY)".format(curr_turn))
                 self.blue_turn()
+            
+            self.game.curr_turn += 1
             
 
             # while True:
@@ -38,14 +43,20 @@ class SantoriniCLI:
 
     def white_turn(self):
         # check if player is human
-        if self._player1_type == "human":
+        if self._player1_type == "random":
+            pass
+        elif self._player1_type == "heuristic":
+            pass
+        else:
+            # self._player1_type == "human":
             # ask for piece selection
+            worker_input = "0" #just a garbage value to be adjusted later
             while True:
                 try:
                     worker_input = input("Select a worker to move\n")
-                    if worker_input == "Z" or "Y":
+                    if worker_input == "Z" or worker_input == "Y":
                         raise OwnerError
-                    elif worker_input != "A" or worker_input != "B":
+                    elif worker_input not in ["A", "B"]:
                         raise ValueError
                     else:
                         # input is good. Player selected either A or B.
@@ -54,15 +65,89 @@ class SantoriniCLI:
                     print("That is not your worker")
                 except ValueError:
                     print("Not a valid worker")
-            # ask for desired move
+            # ask for desired move direction
             while True:
+                valid_directions = ["n", "ne", "e", "se", "s", "sw", "w", "nw"]
                 try:
                     move = input("Select a direction to move (n, ne, e, se, s, sw, w, nw)\n")
+                    if move not in valid_directions:
+                        raise ValueError
+                    # validate move
+                    self.game.move(worker_input, move)
                     break
                 except ValueError:
-                    print("Please try again with a valid date in the format YYYY-MM-DD.")
+                    print("Not a valid direction")
+                except InvalidMove:
+                    print("Cannot move {}".format(move))
+            # now that move is done, build
+            while True:
+                valid_directions = ["n", "ne", "e", "se", "s", "sw", "w", "nw"]
+                try:
+                    build = input("Select a direction to build (n, ne, e, se, s, sw, w, nw)\n")
+                    if build not in valid_directions:
+                        raise ValueError
+                    # validate and execute build
+                    result = self.game.build(worker_input, build)
+                    break
+                except ValueError:
+                    print("Not a valid direction")
+                except InvalidMove:
+                    print("Cannot build {}".format(move))
+            # move and build are done
 
-        
+    def blue_turn(self):
+        # check if player is human
+        if self._player2_type == "random":
+            pass
+        elif self._player2_type == "heuristic":
+            pass
+        else: 
+            # ask for piece selection
+            worker_input = "0" #just a garbage value to be adjusted later
+            while True:
+                try:
+                    worker_input = input("Select a worker to move\n")
+                    if worker_input == "A" or worker_input == "B":
+                        raise OwnerError
+                    elif worker_input not in ["Y", "Z"]:
+                        raise ValueError
+                    else:
+                        # input is good. Player selected either A or B.
+                        break
+                except OwnerError:
+                    print("That is not your worker")
+                except ValueError:
+                    print("Not a valid worker")
+            # ask for desired move direction
+            while True:
+                valid_directions = ["n", "ne", "e", "se", "s", "sw", "w", "nw"]
+                try:
+                    move = input("Select a direction to move (n, ne, e, se, s, sw, w, nw)\n")
+                    if move not in valid_directions:
+                        raise ValueError
+                    # validate move
+                    self.game.move(worker_input, move)
+                    break
+                except ValueError:
+                    print("Not a valid direction")
+                except InvalidMove:
+                    print("Cannot move {}".format(move))
+            # now that move is done, build
+            while True:
+                valid_directions = ["n", "ne", "e", "se", "s", "sw", "w", "nw"]
+                try:
+                    build = input("Select a direction to build (n, ne, e, se, s, sw, w, nw)\n")
+                    if build not in valid_directions:
+                        raise ValueError
+                    # validate and execute build
+                    result = self.game.build(worker_input, build)
+                    break
+                except ValueError:
+                    print("Not a valid direction")
+                except InvalidMove:
+                    print("Cannot build {}".format(move))
+            # move and build are done
         
 if __name__ == "__main__":
-    SantoriniCLI().run()
+    thing = SantoriniCLI()
+    thing.run()

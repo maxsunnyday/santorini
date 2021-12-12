@@ -1,11 +1,14 @@
 import math
 
+class InvalidMove(Exception):
+    pass
+
 class Game:
     def __init__(self):
         self.board = Board()
         self.white_player = Player("w", self.board)
-        self.black_player = Player("b", self.board)
-        self._curr_turn = 1
+        self.blue_player = Player("b", self.board)
+        self.curr_turn = 1
         self.furthest_turn = 1
         self.directions = {
             "s": [1, 0],
@@ -19,7 +22,7 @@ class Game:
         }
 
     def get_turn(self):
-        return self._curr_turn
+        return self.curr_turn
 
     def move(self, worker_letter, direction_str):
         if worker_letter == "A":
@@ -27,14 +30,44 @@ class Game:
         elif worker_letter == "B":
             worker = self.white_player.workers[1]
         elif worker_letter == "Y":
-            worker = self.white_player.workers[1]
+            worker = self.blue_player.workers[0]
         else:
-            player = self.black_player
+            worker = self.blue_player.workers[1]
 
-        
+        direction = self.directions[direction_str]
+        org_slot = worker.slot
+        new_row = org_slot.row + direction[0]
+        new_col = org_slot.col + direction[1]
+        if new_row > 5 or new_row < 1 or new_col > 5 or new_col < 1:
+            raise InvalidMove
+        new_slot = self.board.slots[new_row-1][new_col-1]
+        if new_slot.worker != 0 or new_slot.level == 4 or new_slot.level > org_slot.level + 1:
+            raise InvalidMove
+        new_slot.worker = worker
+        org_slot.worker = 0
+        worker.slot = new_slot
 
-    def build(self, worker, direction):
-        pass
+    def build(self, worker_letter, direction_str):
+        if worker_letter == "A":
+            worker = self.white_player.workers[0]
+        elif worker_letter == "B":
+            worker = self.white_player.workers[1]
+        elif worker_letter == "Y":
+            worker = self.blue_player.workers[0]
+        else:
+            worker = self.blue_player.workers[1]
+
+        direction = self.directions[direction_str]
+        slot = worker.slot
+        new_row = slot.row + direction[0]
+        new_col = slot.col + direction[1]
+        if new_row > 5 or new_row < 1 or new_col > 5 or new_col < 1:
+            raise InvalidMove
+        build_slot = self.board.slots[new_row-1][new_col-1]
+        if build_slot.worker != 0 or build_slot.level == 4:
+            raise InvalidMove
+        else:
+            build_slot.level += 1
 
 class Board:
     def __init__(self):
@@ -89,6 +122,7 @@ class Worker:
 class Player:
     def __init__(self, color, board):
         self.color = color
+        self.possible_moves = []
 
         if color == "w":
             self.workers = []
@@ -107,5 +141,14 @@ class Player:
             self.workers.append(w2)
             board.slots[3][3].worker = w2
 
-game = Game()  
-print(game.board)
+    def find_possible_moves(self, board):
+        # for loop for each movement
+        #   inner for loop for each build
+        #   append(["n", "n"])
+        pass
+
+# game = Game()  
+# print(game.board)
+# game.move("A", "n")
+# game.build("A", "w")
+# print(game.board)
