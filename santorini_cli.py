@@ -21,7 +21,7 @@ class SantoriniCLI:
                 print("Turn: {}, white (AB)".format(curr_turn))
                 self.white_turn()
             else:
-                print("Turn: {}, blue (XY)".format(curr_turn))
+                print("Turn: {}, blue (YZ)".format(curr_turn))
                 self.blue_turn()
             
             self.game.curr_turn += 1
