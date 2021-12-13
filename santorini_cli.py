@@ -1,12 +1,13 @@
 from santorini_game import *
 import sys
+import random
 
 class OwnerError(Exception):
     pass
 
 class SantoriniCLI:
     """Display board and prompt a move"""
-    def __init__(self, player1="human", player2="human"):
+    def __init__(self, player1="random", player2="random"):
         self.game = Game()
         self._player1_type = player1
         self._player2_type = player2
@@ -45,18 +46,22 @@ class SantoriniCLI:
 
     def white_turn(self):
         if self.game.white_player.find_possible_moves(self.game.board):
-            print("white has won\n")
+            print("white has won")
             sys.exit(0)
         elif self.game.blue_player.find_possible_moves(self.game.board):
-            print("blue has won\n")
+            print("blue has won")
             sys.exit(0)
         elif len(self.game.white_player.possible_moves) == 0:
-            print("blue has won\n")
+            print("blue has won via moves")
             sys.exit(0)
 
         # check if player is human
         if self._player1_type == "random":
-            pass
+            move = random.choice(self.game.white_player.possible_moves)
+            self.game.move(move[0], move[1])
+            self.game.build(move[0], move[2])
+            print(f"{move[0]},{move[1]},{move[2]}")
+
         elif self._player1_type == "heuristic":
             pass
         else:
@@ -109,18 +114,21 @@ class SantoriniCLI:
 
     def blue_turn(self):
         if self.game.white_player.find_possible_moves(self.game.board):
-            print("white has won\n")
+            print("white has won")
             sys.exit(0)
         elif self.game.blue_player.find_possible_moves(self.game.board):
-            print("blue has won\n")
+            print("blue has won")
             sys.exit(0)
         elif len(self.game.blue_player.possible_moves) == 0:
-            print("white has won\n")
+            print("white has won via moves")
             sys.exit(0)
 
         # check if player is human
         if self._player2_type == "random":
-            pass
+            move = random.choice(self.game.blue_player.possible_moves)
+            self.game.move(move[0], move[1])
+            self.game.build(move[0], move[2])
+            print(f"{move[0]},{move[1]},{move[2]}")
         elif self._player2_type == "heuristic":
             pass
         else: 

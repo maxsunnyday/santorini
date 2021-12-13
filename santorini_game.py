@@ -150,32 +150,24 @@ class Player:
 
         for w in self.workers:
             for move_d in board.directions:
-                direction = board.directions[move_d]
+                move_direction = board.directions[move_d]
                 org_slot = w.slot
-                new_row = org_slot.row + direction[0]
-                new_col = org_slot.col + direction[1]
+                new_row = org_slot.row + move_direction[0]
+                new_col = org_slot.col + move_direction[1]
                 if new_row > 5 or new_row < 1 or new_col > 5 or new_col < 1:
-                    break
+                    continue
                 new_slot = board.slots[new_row-1][new_col-1]
                 if new_slot.worker != 0 or new_slot.level == 4 or new_slot.level > org_slot.level + 1:
-                    break
+                    continue
 
                 for build_d in board.directions:
-                    direction = board.directions[build_d]
-                    slot = w.slot
-                    new_row = slot.row + direction[0]
-                    new_col = slot.col + direction[1]
-                    if new_row > 5 or new_row < 1 or new_col > 5 or new_col < 1:
-                        break
-                    build_slot = board.slots[new_row-1][new_col-1]
+                    build_direction = board.directions[build_d]
+                    build_row = new_slot.row + build_direction[0]
+                    build_col = new_slot.col + build_direction[1]
+                    if build_row > 5 or build_row < 1 or build_col > 5 or build_col < 1:
+                        continue
+                    build_slot = board.slots[build_row-1][build_col-1]
                     if build_slot.worker != 0 or build_slot.level == 4:
-                        break
+                        continue
 
-                    self.possible_moves.append([move_d, build_d])
-
-
-# game = Game()  
-# print(game.board)
-# game.move("A", "n")
-# game.build("A", "w")
-# print(game.board)
+                    self.possible_moves.append([w.name, move_d, build_d])
