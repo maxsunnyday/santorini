@@ -9,6 +9,7 @@ class InvalidMove(Exception):
 
 class Game:
     def __init__(self, board=0, white=0, blue=0, turn=1):
+        # initilize everything unless its passed in as argument
         if board == 0:
             self.board = Board()
         else:
@@ -31,6 +32,7 @@ class Game:
         return self.curr_turn
 
     def move(self, worker_letter, direction_str):
+        # determine which worker is moving
         if worker_letter == "A":
             worker = self.white_player.workers[0]
         elif worker_letter == "B":
@@ -42,18 +44,24 @@ class Game:
 
         direction = self.board.directions[direction_str]
         org_slot = worker.slot
+        # find new slot based on direction
         new_row = org_slot.row + direction[0]
         new_col = org_slot.col + direction[1]
+        # invalid if square is outside the board
         if new_row > 5 or new_row < 1 or new_col > 5 or new_col < 1:
             raise InvalidMove
         new_slot = self.board.slots[new_row-1][new_col-1]
+        # invalid if slot has a dome or has a worker on it
         if new_slot.worker != 0 or new_slot.level == 4 or new_slot.level > org_slot.level + 1:
             raise InvalidMove
+        
+        # move worker from org_slot to new_slot
         new_slot.worker = worker
         org_slot.worker = 0
         worker.slot = new_slot
 
     def build(self, worker_letter, direction_str):
+        # determine which worker is building
         if worker_letter == "A":
             worker = self.white_player.workers[0]
         elif worker_letter == "B":
@@ -65,11 +73,14 @@ class Game:
 
         direction = self.board.directions[direction_str]
         slot = worker.slot
+        # find new slot based on direction
         new_row = slot.row + direction[0]
         new_col = slot.col + direction[1]
+        # invalid if square is outside the board
         if new_row > 5 or new_row < 1 or new_col > 5 or new_col < 1:
             raise InvalidMove
         build_slot = self.board.slots[new_row-1][new_col-1]
+        # invalid if slot has a dome or has a worker on it
         if build_slot.worker != 0 or build_slot.level == 4:
             raise InvalidMove
         else:
@@ -141,6 +152,7 @@ class Player:
         self.color = color
         self.possible_moves = []
 
+        # initialize workers
         if color == "w":
             self.workers = []
             w1 = Worker("A", board.slots[3][1])
@@ -161,28 +173,35 @@ class Player:
     def find_possible_moves(self, board):
         self.possible_moves = []
 
+        # if either worker is on a level 3 building, the player wins
         if self.workers[0].slot.level == 3 or self.workers[1].slot.level == 3:
             return True
 
         for w in self.workers:
+            # find all possible directions each worker can move in
             for move_d in board.directions:
                 move_direction = board.directions[move_d]
                 org_slot = w.slot
                 new_row = org_slot.row + move_direction[0]
                 new_col = org_slot.col + move_direction[1]
+                # skip if outside of board
                 if new_row > 5 or new_row < 1 or new_col > 5 or new_col < 1:
                     continue
                 new_slot = board.slots[new_row-1][new_col-1]
+                # skip if slot has worker or is too high up or is a dome
                 if new_slot.worker != 0 or new_slot.level == 4 or new_slot.level > org_slot.level + 1:
                     continue
-
+                
+                # find all possible directions each worker can build in
                 for build_d in board.directions:
                     build_direction = board.directions[build_d]
                     build_row = new_slot.row + build_direction[0]
                     build_col = new_slot.col + build_direction[1]
+                    # skip if outside of board
                     if build_row > 5 or build_row < 1 or build_col > 5 or build_col < 1:
                         continue
                     build_slot = board.slots[build_row-1][build_col-1]
+                    # skip if worker is on it or has a dome
                     if (build_slot.worker != 0 and build_slot != org_slot) or build_slot.level == 4:
                         continue
 
@@ -194,6 +213,7 @@ class Player:
     def center_score(self, s1, s2):
         score = 0
 
+        # middle square is 2 points, inner ring is 1 point, outer ring is 0 points
         if s1.row == 3 and s1.col == 3:
             score += 2
         elif s1.row not in [1,5] and s1.col not in [1,5]:
@@ -221,8 +241,9 @@ class Player:
             return 3*self.height_score(s1, s2) + 2*self.center_score(s1, s2) + 1*self.distance_score(s1, s2, opp_player)
 
     def heuristic(self, board, opp_player):
-        ordered_moves = []
+        best_moves = []
 
+        # calculate heuristic for all possible moves
         for m in self.possible_moves:
             if self.workers[0].name == m[0]:
                 moved_worker_slot = self.workers[0].slot
@@ -232,15 +253,19 @@ class Player:
                 other_worker_slot = self.workers[0].slot
 
             move_direction = board.directions[m[1]]
+            # find slot based on direction
             new_row = moved_worker_slot.row + move_direction[0]
             new_col = moved_worker_slot.col + move_direction[1]
             new_slot = board.slots[new_row-1][new_col-1]
             move_score = self.move_score(new_slot, other_worker_slot, opp_player)
             
-            if ordered_moves == [] or move_score > ordered_moves[0][1]:
-                ordered_moves = []
-                ordered_moves.append((m, move_score))
-            elif move_score == ordered_moves[0][1]:
-                ordered_moves.append((m, move_score))
+            # clear array and add move if score is greater than the current best move
+            if best_moves == [] or move_score > best_moves[0][1]:
+                best_moves = []
+                best_moves.append((m, move_score))
+            elif move_score == best_moves[0][1]:
+                # if score is the same as the current best move, add move to array
+                best_moves.append((m, move_score))
 
-        return random.choice(ordered_moves)[0]
+        # if there are multiple moves with the best score, randomly break ties
+        return random.choice(best_moves)[0]
