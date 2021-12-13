@@ -168,7 +168,7 @@ class Player:
                     if build_row > 5 or build_row < 1 or build_col > 5 or build_col < 1:
                         continue
                     build_slot = board.slots[build_row-1][build_col-1]
-                    if build_slot.worker != 0 or build_slot.level == 4:
+                    if (build_slot.worker != 0 and build_slot != org_slot) or build_slot.level == 4:
                         continue
 
                     self.possible_moves.append([w.name, move_d, build_d])

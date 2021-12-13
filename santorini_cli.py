@@ -6,10 +6,12 @@ class OwnerError(Exception):
 
 class SantoriniCLI:
     """Display board and prompt a move"""
-    def __init__(self, player1="heuristic", player2="heuristic"):
+    def __init__(self, player1="human", player2="human", undo="off", display_score="off"):
         self.game = Game()
         self._player1_type = player1
         self._player2_type = player2
+        self.display_score = display_score
+        self.undo = undo
             
     def run(self):
         while True:
@@ -20,28 +22,25 @@ class SantoriniCLI:
             curr_turn = self.game.get_turn()
             # if odd, white moves. if even, blue moves.
             if (curr_turn % 2) != 0:
-                print("Turn: {}, white (AB)".format(curr_turn))
+                # get current move_score if display score is on
+                if self.display_score == "on":
+                    player = self.game.white_player
+                    score = f", ({player.height_score(player.workers[0].slot, player.workers[1].slot)}, {player.center_score(player.workers[0].slot, player.workers[1].slot)}, {player.distance_score(player.workers[0].slot, player.workers[1].slot, self.game.blue_player)})"
+                else:
+                    score = ""
+                print(f"Turn: {curr_turn}, white (AB){score}")
                 self.white_turn()
             else:
-                print("Turn: {}, blue (YZ)".format(curr_turn))
+                # get current move_score if display score is on
+                if self.display_score == "on":
+                    player = self.game.blue_player
+                    score = f", ({player.height_score(player.workers[0].slot, player.workers[1].slot)}, {player.center_score(player.workers[0].slot, player.workers[1].slot)}, {player.distance_score(player.workers[0].slot, player.workers[1].slot, self.game.white_player)})"
+                else:
+                    score = ""
+                print(f"Turn: {curr_turn}, blue (YZ){score}")
                 self.blue_turn()
             
             self.game.curr_turn += 1
-            
-
-            # while True:
-            #     try:
-            #         move = input("Select a direction to move (n, ne, e, se, s, sw, w, nw)\n")
-            #         break
-            #     except ValueError:
-            #         print("Please try again with a valid date in the format YYYY-MM-DD.")
-
-            # while True:
-            #     try:
-            #         build = input("Select a direction to build (n, ne, e, se, s, sw, w, nw)\n")
-            #         break
-            #     except ValueError:
-            #         print("Please try again with a valid date in the format YYYY-MM-DD.")
 
     def white_turn(self):
         if self.game.white_player.find_possible_moves(self.game.board):
@@ -184,5 +183,17 @@ class SantoriniCLI:
             # move and build are done
         
 if __name__ == "__main__":
-    thing = SantoriniCLI()
+    if len(sys.argv) <= 1:
+        thing = SantoriniCLI()
+    elif len(sys.argv) == 2:
+        thing = SantoriniCLI(sys.argv[1])
+    elif len(sys.argv) == 3:
+        thing = SantoriniCLI(sys.argv[1], sys.argv[2])
+    elif len(sys.argv) == 4:
+        thing = SantoriniCLI(sys.argv[1], sys.argv[2], sys.argv[3])
+    elif len(sys.argv) == 5:
+        thing = SantoriniCLI(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
+    else:
+        print("too many command-line arguments")
+    
     thing.run()
