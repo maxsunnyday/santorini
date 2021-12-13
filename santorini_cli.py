@@ -1,13 +1,12 @@
 from santorini_game import *
 import sys
-import random
 
 class OwnerError(Exception):
     pass
 
 class SantoriniCLI:
     """Display board and prompt a move"""
-    def __init__(self, player1="random", player2="random"):
+    def __init__(self, player1="heuristic", player2="heuristic"):
         self.game = Game()
         self._player1_type = player1
         self._player2_type = player2
@@ -63,7 +62,10 @@ class SantoriniCLI:
             print(f"{move[0]},{move[1]},{move[2]}")
 
         elif self._player1_type == "heuristic":
-            pass
+            move = self.game.white_player.heuristic(self.game.board, self.game.blue_player)
+            self.game.move(move[0], move[1])
+            self.game.build(move[0], move[2])
+            print(f"{move[0]},{move[1]},{move[2]}")
         else:
             # self._player1_type == "human":
             # ask for piece selection
@@ -130,7 +132,10 @@ class SantoriniCLI:
             self.game.build(move[0], move[2])
             print(f"{move[0]},{move[1]},{move[2]}")
         elif self._player2_type == "heuristic":
-            pass
+            move = self.game.blue_player.heuristic(self.game.board, self.game.white_player)
+            self.game.move(move[0], move[1])
+            self.game.build(move[0], move[2])
+            print(f"{move[0]},{move[1]},{move[2]}")
         else: 
             # ask for piece selection
             worker_input = "0" #just a garbage value to be adjusted later

@@ -1,4 +1,5 @@
 import math
+import random
 
 class InvalidMove(Exception):
     pass
@@ -140,7 +141,7 @@ class Player:
             board.slots[1][1].worker = w1
             w2 = Worker("Z", board.slots[3][3])
             self.workers.append(w2)
-            board.slots[3][3].worker = w2
+            board.slots[3][3].worker = w2        
 
     def find_possible_moves(self, board):
         self.possible_moves = []
@@ -171,3 +172,60 @@ class Player:
                         continue
 
                     self.possible_moves.append([w.name, move_d, build_d])
+
+    def height_score(self, s1, s2):
+        return s1.level + s2.level
+
+    def center_score(self, s1, s2):
+        score = 0
+
+        if s1.row == 3 and s1.col == 3:
+            score += 2
+        elif s1.row not in [1,5] and s1.col not in [1,5]:
+            score += 1
+
+        if s2.row == 3 and s2.col == 3:
+            score += 2
+        elif s2.row not in [1,5] and s2.col not in [1,5]:
+            score += 1
+
+        return score
+
+    def distance_score(self, s1, s2, opp_player):
+        distance = 0
+
+        for w in opp_player.workers:
+            distance += min(max(abs(s1.row - w.slot.row), abs(s1.col - w.slot.col)), max(abs(s2.row - w.slot.row), abs(s2.col - w.slot.col)))
+
+        return 8 - distance
+
+    def move_score(self, s1, s2, opp_player):
+        if s1.level == 3 or s2.level == 3:
+            return float("inf")
+        else:
+            return 3*self.height_score(s1, s2) + 2*self.center_score(s1, s2) + self.distance_score(s1, s2, opp_player)
+
+    def heuristic(self, board, opp_player):
+        ordered_moves = []
+
+        for m in self.possible_moves:
+            if self.workers[0].name == m[0]:
+                moved_worker_slot = self.workers[0].slot
+                other_worker_slot = self.workers[1].slot
+            else:
+                moved_worker_slot = self.workers[1].slot
+                other_worker_slot = self.workers[0].slot
+
+            move_direction = board.directions[m[1]]
+            new_row = moved_worker_slot.row + move_direction[0]
+            new_col = moved_worker_slot.col + move_direction[1]
+            new_slot = board.slots[new_row-1][new_col-1]
+            move_score = self.move_score(new_slot, other_worker_slot, opp_player)
+            
+            if ordered_moves == [] or move_score > ordered_moves[0][1]:
+                ordered_moves = []
+                ordered_moves.append((m, move_score))
+            elif move_score == ordered_moves[0][1]:
+                ordered_moves.append((m, move_score))
+
+        return random.choice(ordered_moves)[0]
