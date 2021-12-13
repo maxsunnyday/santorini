@@ -52,7 +52,7 @@ class SantoriniCLI:
             print("blue has won")
             sys.exit(0)
         elif len(self.game.white_player.possible_moves) == 0:
-            print("blue has won via moves")
+            print("blue has won")
             sys.exit(0)
 
         # check if player is human
@@ -120,7 +120,7 @@ class SantoriniCLI:
             print("blue has won")
             sys.exit(0)
         elif len(self.game.blue_player.possible_moves) == 0:
-            print("white has won via moves")
+            print("white has won")
             sys.exit(0)
 
         # check if player is human
