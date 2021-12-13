@@ -1,6 +1,9 @@
 import math
 import random
 
+class OwnerError(Exception):
+    pass
+
 class InvalidMove(Exception):
     pass
 

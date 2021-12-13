@@ -2,9 +2,6 @@ from santorini_game import *
 from copy import deepcopy
 import sys
 
-class OwnerError(Exception):
-    pass
-
 class SantoriniCLI:
     """Display board and prompt a move"""
     def __init__(self, player1="human", player2="human", undo="off", display_score="off"):
