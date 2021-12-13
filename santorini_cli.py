@@ -12,12 +12,12 @@ class SantoriniCLI:
         self._player2_type = player2
         self.display_score = display_score
         self.undo = undo
+        self.game_instances = [Game(self.game.board, self.game.white_player, self.game.blue_player, self.game.curr_turn)]
             
     def run(self):
         while True:
             print(self.game.board)
             # check if game is over
-
             # fetch current turn number
             curr_turn = self.game.get_turn()
             # if odd, white moves. if even, blue moves.
@@ -28,8 +28,34 @@ class SantoriniCLI:
                     score = f", ({player.height_score(player.workers[0].slot, player.workers[1].slot)}, {player.center_score(player.workers[0].slot, player.workers[1].slot)}, {player.distance_score(player.workers[0].slot, player.workers[1].slot, self.game.blue_player)})"
                 else:
                     score = ""
+
                 print(f"Turn: {curr_turn}, white (AB){score}")
-                self.white_turn()
+    
+                # undo, redo, next functionality
+                if self.undo == "on":
+                    for i in self.game_instances:
+                        print(i.curr_turn)
+                        print(i.board)
+                    try:
+                        history_input = input("undo, redo, or next\n")
+                        if history_input == "undo":
+                            if curr_turn > 1:
+                                self.game = self.game_instances[curr_turn-2]
+                            continue
+                        elif history_input == "redo":
+                            if curr_turn < len(self.game_instances):
+                                self.game = self.game_instances[curr_turn]
+                            continue
+                        elif history_input == "next":
+                            while curr_turn < len(self.game_instances):
+                                self.game_instances.pop()
+                            self.white_turn()
+                        else:
+                            raise ValueError
+                    except ValueError:
+                        print("Not a valid command")
+                else:
+                    self.white_turn()
             else:
                 # get current move_score if display score is on
                 if self.display_score == "on":
@@ -37,10 +63,34 @@ class SantoriniCLI:
                     score = f", ({player.height_score(player.workers[0].slot, player.workers[1].slot)}, {player.center_score(player.workers[0].slot, player.workers[1].slot)}, {player.distance_score(player.workers[0].slot, player.workers[1].slot, self.game.white_player)})"
                 else:
                     score = ""
+
                 print(f"Turn: {curr_turn}, blue (YZ){score}")
-                self.blue_turn()
+                
+                # undo, redo, next functionality
+                if self.undo == "on":
+                    try:
+                        history_input = input("undo, redo, or next\n")
+                        if history_input == "undo":
+                            if curr_turn > 1:
+                                self.game = self.game_instances[curr_turn-2]
+                            continue
+                        elif history_input == "redo":
+                            if curr_turn < len(self.game_instances):
+                                self.game = self.game_instances[curr_turn]
+                            continue
+                        elif history_input == "next":
+                            while curr_turn < len(self.game_instances):
+                                self.game_instances.pop()
+                            self.blue_turn()
+                        else:
+                            raise ValueError
+                    except ValueError:
+                        print("Not a valid command")
+                else:
+                    self.blue_turn()
             
             self.game.curr_turn += 1
+            self.game_instances.append(Game(self.game.board, self.game.white_player, self.game.blue_player, self.game.curr_turn))
 
     def white_turn(self):
         if self.game.white_player.find_possible_moves(self.game.board):

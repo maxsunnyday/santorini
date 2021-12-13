@@ -5,12 +5,24 @@ class InvalidMove(Exception):
     pass
 
 class Game:
-    def __init__(self):
-        self.board = Board()
-        self.white_player = Player("w", self.board)
-        self.blue_player = Player("b", self.board)
-        self.curr_turn = 1
-        self.furthest_turn = 1
+    def __init__(self, board=0, white=0, blue=0, turn=1):
+        if board == 0:
+            self.board = Board()
+        else:
+            self.board = board
+
+        if white == 0:
+            self.white_player = Player("w", self.board)
+        else:
+            self.white_player = white
+
+        if white == 0:
+            self.blue_player = Player("b", self.board)
+        else:
+            self.blue_player = blue
+        
+        self.curr_turn = turn
+        # self.furthest_turn = 1
 
     def get_turn(self):
         return self.curr_turn
@@ -203,7 +215,7 @@ class Player:
         if s1.level == 3 or s2.level == 3:
             return float("inf")
         else:
-            return 3*self.height_score(s1, s2) + 2*self.center_score(s1, s2) + self.distance_score(s1, s2, opp_player)
+            return 3*self.height_score(s1, s2) + 2*self.center_score(s1, s2) + 1*self.distance_score(s1, s2, opp_player)
 
     def heuristic(self, board, opp_player):
         ordered_moves = []
