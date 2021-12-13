@@ -10,16 +10,6 @@ class Game:
         self.blue_player = Player("b", self.board)
         self.curr_turn = 1
         self.furthest_turn = 1
-        self.directions = {
-            "s": [1, 0],
-            "se": [1, 1],
-            "e": [0, 1],
-            "ne": [-1, 1],
-            "n": [-1, 0],
-            "nw": [-1, -1],
-            "w": [0, -1],
-            "sw": [1, -1]
-        }
 
     def get_turn(self):
         return self.curr_turn
@@ -34,7 +24,7 @@ class Game:
         else:
             worker = self.blue_player.workers[1]
 
-        direction = self.directions[direction_str]
+        direction = self.board.directions[direction_str]
         org_slot = worker.slot
         new_row = org_slot.row + direction[0]
         new_col = org_slot.col + direction[1]
@@ -57,7 +47,7 @@ class Game:
         else:
             worker = self.blue_player.workers[1]
 
-        direction = self.directions[direction_str]
+        direction = self.board.directions[direction_str]
         slot = worker.slot
         new_row = slot.row + direction[0]
         new_col = slot.col + direction[1]
@@ -78,6 +68,17 @@ class Board:
             for j in range(5):
                 row.append(Slot(i + 1, j + 1))
             self.slots.append(row)
+
+        self.directions = {
+            "s": [1, 0],
+            "se": [1, 1],
+            "e": [0, 1],
+            "ne": [-1, 1],
+            "n": [-1, 0],
+            "nw": [-1, -1],
+            "w": [0, -1],
+            "sw": [1, -1]
+        }
 
     def __repr__(self):
         return_string = ""
@@ -142,10 +143,36 @@ class Player:
             board.slots[3][3].worker = w2
 
     def find_possible_moves(self, board):
-        # for loop for each movement
-        #   inner for loop for each build
-        #   append(["n", "n"])
-        pass
+        self.possible_moves = []
+
+        if self.workers[0].slot.level == 3 or self.workers[1].slot.level == 3:
+            return True
+
+        for w in self.workers:
+            for move_d in board.directions:
+                direction = board.directions[move_d]
+                org_slot = w.slot
+                new_row = org_slot.row + direction[0]
+                new_col = org_slot.col + direction[1]
+                if new_row > 5 or new_row < 1 or new_col > 5 or new_col < 1:
+                    break
+                new_slot = board.slots[new_row-1][new_col-1]
+                if new_slot.worker != 0 or new_slot.level == 4 or new_slot.level > org_slot.level + 1:
+                    break
+
+                for build_d in board.directions:
+                    direction = board.directions[build_d]
+                    slot = w.slot
+                    new_row = slot.row + direction[0]
+                    new_col = slot.col + direction[1]
+                    if new_row > 5 or new_row < 1 or new_col > 5 or new_col < 1:
+                        break
+                    build_slot = board.slots[new_row-1][new_col-1]
+                    if build_slot.worker != 0 or build_slot.level == 4:
+                        break
+
+                    self.possible_moves.append([move_d, build_d])
+
 
 # game = Game()  
 # print(game.board)

@@ -1,4 +1,5 @@
 from santorini_game import *
+import sys
 
 class OwnerError(Exception):
     pass
@@ -14,6 +15,7 @@ class SantoriniCLI:
         while True:
             print(self.game.board)
             # check if game is over
+
             # fetch current turn number
             curr_turn = self.game.get_turn()
             # if odd, white moves. if even, blue moves.
@@ -42,6 +44,16 @@ class SantoriniCLI:
             #         print("Please try again with a valid date in the format YYYY-MM-DD.")
 
     def white_turn(self):
+        if self.game.white_player.find_possible_moves(self.game.board):
+            print("white has won\n")
+            sys.exit(0)
+        elif self.game.blue_player.find_possible_moves(self.game.board):
+            print("blue has won\n")
+            sys.exit(0)
+        elif len(self.game.white_player.possible_moves) == 0:
+            print("blue has won\n")
+            sys.exit(0)
+
         # check if player is human
         if self._player1_type == "random":
             pass
@@ -92,10 +104,20 @@ class SantoriniCLI:
                 except ValueError:
                     print("Not a valid direction")
                 except InvalidMove:
-                    print("Cannot build {}".format(move))
+                    print("Cannot build {}".format(build))
             # move and build are done
 
     def blue_turn(self):
+        if self.game.white_player.find_possible_moves(self.game.board):
+            print("white has won\n")
+            sys.exit(0)
+        elif self.game.blue_player.find_possible_moves(self.game.board):
+            print("blue has won\n")
+            sys.exit(0)
+        elif len(self.game.blue_player.possible_moves) == 0:
+            print("white has won\n")
+            sys.exit(0)
+
         # check if player is human
         if self._player2_type == "random":
             pass
@@ -145,7 +167,7 @@ class SantoriniCLI:
                 except ValueError:
                     print("Not a valid direction")
                 except InvalidMove:
-                    print("Cannot build {}".format(move))
+                    print("Cannot build {}".format(build))
             # move and build are done
         
 if __name__ == "__main__":
