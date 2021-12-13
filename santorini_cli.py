@@ -1,4 +1,5 @@
 from santorini_game import *
+from copy import deepcopy
 import sys
 
 class OwnerError(Exception):
@@ -12,7 +13,30 @@ class SantoriniCLI:
         self._player2_type = player2
         self.display_score = display_score
         self.undo = undo
-        self.game_instances = [Game(self.game.board, self.game.white_player, self.game.blue_player, self.game.curr_turn)]
+        self.game_instances = [self.copy(self.game)]
+
+    def copy(self, game):
+        white = deepcopy(game.white_player)
+        blue = deepcopy(game.blue_player)
+        board = deepcopy(game.board)
+        turn = deepcopy(game.curr_turn)
+
+        for i in range(len(game.board.slots)):
+            for j in range(len(game.board.slots[i])):
+                board.slots[i][j] = deepcopy(game.board.slots[i][j])
+                board.slots[i][j].worker = deepcopy(game.board.slots[i][j].worker)
+
+        for w in range(len(game.white_player.workers)):
+            org_worker = game.white_player.workers[w]
+            white.workers[w] = deepcopy(org_worker)
+            white.workers[w].slot = board.slots[org_worker.slot.row-1][org_worker.slot.col-1]
+
+        for w in range(len(game.blue_player.workers)):
+            org_worker = game.blue_player.workers[w]
+            blue.workers[w] = deepcopy(org_worker)
+            blue.workers[w].slot = board.slots[org_worker.slot.row-1][org_worker.slot.col-1]
+
+        return Game(board, white, blue, turn)
             
     def run(self):
         while True:
@@ -33,27 +57,33 @@ class SantoriniCLI:
     
                 # undo, redo, next functionality
                 if self.undo == "on":
-                    for i in self.game_instances:
-                        print(i.curr_turn)
-                        print(i.board)
-                    try:
-                        history_input = input("undo, redo, or next\n")
-                        if history_input == "undo":
-                            if curr_turn > 1:
-                                self.game = self.game_instances[curr_turn-2]
-                            continue
-                        elif history_input == "redo":
-                            if curr_turn < len(self.game_instances):
-                                self.game = self.game_instances[curr_turn]
-                            continue
-                        elif history_input == "next":
-                            while curr_turn < len(self.game_instances):
-                                self.game_instances.pop()
-                            self.white_turn()
-                        else:
-                            raise ValueError
-                    except ValueError:
-                        print("Not a valid command")
+                    reload = 0
+
+                    while True:
+                        try:
+                            history_input = input("undo, redo, or next\n")
+                            if history_input == "undo":
+                                if curr_turn > 1:
+                                    self.game = self.copy(self.game_instances[curr_turn-2])
+                                reload = 1
+                                break
+                            elif history_input == "redo":
+                                if curr_turn < len(self.game_instances):
+                                    self.game = self.copy(self.game_instances[curr_turn])
+                                reload = 1
+                                break
+                            elif history_input == "next":
+                                while curr_turn < len(self.game_instances):
+                                    self.game_instances.pop()
+                                self.white_turn()
+                                break
+                            else:
+                                raise ValueError
+                        except ValueError:
+                            print("Not a valid command")
+
+                    if reload == 1:
+                        continue
                 else:
                     self.white_turn()
             else:
@@ -68,29 +98,38 @@ class SantoriniCLI:
                 
                 # undo, redo, next functionality
                 if self.undo == "on":
-                    try:
-                        history_input = input("undo, redo, or next\n")
-                        if history_input == "undo":
-                            if curr_turn > 1:
-                                self.game = self.game_instances[curr_turn-2]
-                            continue
-                        elif history_input == "redo":
-                            if curr_turn < len(self.game_instances):
-                                self.game = self.game_instances[curr_turn]
-                            continue
-                        elif history_input == "next":
-                            while curr_turn < len(self.game_instances):
-                                self.game_instances.pop()
-                            self.blue_turn()
-                        else:
-                            raise ValueError
-                    except ValueError:
-                        print("Not a valid command")
+                    reload = 0
+
+                    while True:
+                        try:
+                            history_input = input("undo, redo, or next\n")
+                            if history_input == "undo":
+                                if curr_turn > 1:
+                                    self.game = self.copy(self.game_instances[curr_turn-2])
+                                reload = 1
+                                break
+                            elif history_input == "redo":
+                                if curr_turn < len(self.game_instances):
+                                    self.game = self.copy(self.game_instances[curr_turn])
+                                reload = 1
+                                break
+                            elif history_input == "next":
+                                while curr_turn < len(self.game_instances):
+                                    self.game_instances.pop()
+                                self.blue_turn()
+                                break
+                            else:
+                                raise ValueError
+                        except ValueError:
+                            print("Not a valid command")
+
+                    if reload == 1:
+                        continue
                 else:
                     self.blue_turn()
             
             self.game.curr_turn += 1
-            self.game_instances.append(Game(self.game.board, self.game.white_player, self.game.blue_player, self.game.curr_turn))
+            self.game_instances.append(self.copy(self.game))
 
     def white_turn(self):
         if self.game.white_player.find_possible_moves(self.game.board):
