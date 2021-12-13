@@ -1,4 +1,3 @@
-import math
 import random
 
 class OwnerError(Exception):
@@ -236,6 +235,7 @@ class Player:
 
     def move_score(self, s1, s2, opp_player):
         if s1.level == 3 or s2.level == 3:
+            # assign infinity to move if it results in moving to a level 3 building (win)
             return float("inf")
         else:
             return 3*self.height_score(s1, s2) + 2*self.center_score(s1, s2) + 1*self.distance_score(s1, s2, opp_player)
@@ -245,6 +245,7 @@ class Player:
 
         # calculate heuristic for all possible moves
         for m in self.possible_moves:
+            # determine which worker is being moved
             if self.workers[0].name == m[0]:
                 moved_worker_slot = self.workers[0].slot
                 other_worker_slot = self.workers[1].slot
