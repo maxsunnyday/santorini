@@ -19,7 +19,7 @@ class Game:
         else:
             self.white_player = white
 
-        if white == 0:
+        if blue == 0:
             self.blue_player = Player("b", self.board)
         else:
             self.blue_player = blue
