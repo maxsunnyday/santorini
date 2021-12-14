@@ -8,8 +8,8 @@ class SantoriniCLI:
         self.game = Game()
         self._player1_type = player1
         self._player2_type = player2
-        self.display_score = display_score
-        self.undo = undo
+        self._display_score = display_score
+        self._undo = undo
         self.game_instances = [self.copy(self.game)]
 
     # deep copies everything within game and maintains relationship between slots and workers
@@ -47,7 +47,7 @@ class SantoriniCLI:
             # if odd, white moves. if even, blue moves.
             if (curr_turn % 2) != 0:
                 # display current move_score if display score is on
-                if self.display_score == "on":
+                if self._display_score == "on":
                     player = self.game.white_player
                     score = f", ({player.height_score(player.workers[0].slot, player.workers[1].slot)}, {player.center_score(player.workers[0].slot, player.workers[1].slot)}, {player.distance_score(player.workers[0].slot, player.workers[1].slot, self.game.blue_player)})"
                 else:
@@ -56,7 +56,7 @@ class SantoriniCLI:
                 print(f"Turn: {curr_turn}, white (AB){score}")
     
                 # undo, redo, next functionality
-                if self.undo == "on":
+                if self._undo == "on":
                     reload = 0
 
                     while True:
@@ -88,7 +88,7 @@ class SantoriniCLI:
                     self.white_turn()
             else:
                 # display current move_score if display score is on
-                if self.display_score == "on":
+                if self._display_score == "on":
                     player = self.game.blue_player
                     score = f", ({player.height_score(player.workers[0].slot, player.workers[1].slot)}, {player.center_score(player.workers[0].slot, player.workers[1].slot)}, {player.distance_score(player.workers[0].slot, player.workers[1].slot, self.game.white_player)})"
                 else:
@@ -97,7 +97,7 @@ class SantoriniCLI:
                 print(f"Turn: {curr_turn}, blue (YZ){score}")
                 
                 # undo, redo, next functionality
-                if self.undo == "on":
+                if self._undo == "on":
                     reload = 0
 
                     while True:
@@ -127,7 +127,7 @@ class SantoriniCLI:
                         continue
                 else:
                     self.blue_turn()
-                    
+
             # end of turn
             self.game.curr_turn += 1
             self.game_instances.append(self.copy(self.game))
