@@ -1,4 +1,5 @@
 import random
+from copy import deepcopy
 
 class OwnerError(Exception):
     pass
@@ -25,7 +26,33 @@ class Game:
             self.blue_player = blue
         
         self.curr_turn = turn
-        # self.furthest_turn = 1
+
+    # deep copies everything within game and maintains relationship between slots and workers
+    def copy(self):
+        white = deepcopy(self.white_player)
+        blue = deepcopy(self.blue_player)
+        board = deepcopy(self.board)
+        turn = deepcopy(self.curr_turn)
+
+        # copies all the individual slots
+        for i in range(len(self.board.slots)):
+            for j in range(len(self.board.slots[i])):
+                board.slots[i][j] = deepcopy(self.board.slots[i][j])
+                board.slots[i][j].worker = deepcopy(self.board.slots[i][j].worker)
+
+        # copies workers A and B
+        for w in range(len(self.white_player.workers)):
+            org_worker = self.white_player.workers[w]
+            white.workers[w] = deepcopy(org_worker)
+            white.workers[w].slot = board.slots[org_worker.slot.row-1][org_worker.slot.col-1]
+
+        # copies worker Y and Z
+        for w in range(len(self.blue_player.workers)):
+            org_worker = self.blue_player.workers[w]
+            blue.workers[w] = deepcopy(org_worker)
+            blue.workers[w].slot = board.slots[org_worker.slot.row-1][org_worker.slot.col-1]
+
+        return Game(board, white, blue, turn)
 
     def get_turn(self):
         return self.curr_turn

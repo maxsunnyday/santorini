@@ -1,5 +1,4 @@
 from santorini_game import *
-from copy import deepcopy
 import sys
 
 class SantoriniCLI:
@@ -10,34 +9,7 @@ class SantoriniCLI:
         self._player2_type = player2
         self._display_score = display_score
         self._undo = undo
-        self.game_instances = [self.copy(self.game)]
-
-    # deep copies everything within game and maintains relationship between slots and workers
-    def copy(self, game):
-        white = deepcopy(game.white_player)
-        blue = deepcopy(game.blue_player)
-        board = deepcopy(game.board)
-        turn = deepcopy(game.curr_turn)
-
-        # copies all the individual slots
-        for i in range(len(game.board.slots)):
-            for j in range(len(game.board.slots[i])):
-                board.slots[i][j] = deepcopy(game.board.slots[i][j])
-                board.slots[i][j].worker = deepcopy(game.board.slots[i][j].worker)
-
-        # copies workers A and B
-        for w in range(len(game.white_player.workers)):
-            org_worker = game.white_player.workers[w]
-            white.workers[w] = deepcopy(org_worker)
-            white.workers[w].slot = board.slots[org_worker.slot.row-1][org_worker.slot.col-1]
-
-        # copies worker Y and Z
-        for w in range(len(game.blue_player.workers)):
-            org_worker = game.blue_player.workers[w]
-            blue.workers[w] = deepcopy(org_worker)
-            blue.workers[w].slot = board.slots[org_worker.slot.row-1][org_worker.slot.col-1]
-
-        return Game(board, white, blue, turn)
+        self.game_instances = [self.game.copy()]
             
     def run(self):
         while True:
@@ -64,12 +36,12 @@ class SantoriniCLI:
                             history_input = input("undo, redo, or next\n")
                             if history_input == "undo":
                                 if curr_turn > 1:
-                                    self.game = self.copy(self.game_instances[curr_turn-2])
+                                    self.game = self.game_instances[curr_turn-2].copy()
                                 reload = 1
                                 break
                             elif history_input == "redo":
                                 if curr_turn < len(self.game_instances):
-                                    self.game = self.copy(self.game_instances[curr_turn])
+                                    self.game = self.game_instances[curr_turn].copy()
                                 reload = 1
                                 break
                             elif history_input == "next":
@@ -105,12 +77,12 @@ class SantoriniCLI:
                             history_input = input("undo, redo, or next\n")
                             if history_input == "undo":
                                 if curr_turn > 1:
-                                    self.game = self.copy(self.game_instances[curr_turn-2])
+                                    self.game = self.game_instances[curr_turn-2].copy()
                                 reload = 1
                                 break
                             elif history_input == "redo":
                                 if curr_turn < len(self.game_instances):
-                                    self.game = self.copy(self.game_instances[curr_turn])
+                                    self.game = self.game_instances[curr_turn].copy()
                                 reload = 1
                                 break
                             elif history_input == "next":
@@ -130,7 +102,7 @@ class SantoriniCLI:
 
             # end of turn
             self.game.curr_turn += 1
-            self.game_instances.append(self.copy(self.game))
+            self.game_instances.append(self.game.copy())
 
     def white_turn(self):
         # check if game is over
