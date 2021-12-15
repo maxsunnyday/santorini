@@ -101,7 +101,7 @@ class SantoriniCLI:
                     self.blue_turn()
 
             # end of turn
-            self.game.curr_turn += 1
+            self.game._curr_turn += 1
             self.game_instances.append(self.game.copy())
 
     def white_turn(self):

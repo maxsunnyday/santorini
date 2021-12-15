@@ -25,14 +25,14 @@ class Game:
         else:
             self.blue_player = blue
         
-        self.curr_turn = turn
+        self._curr_turn = turn
 
     # deep copies everything within game and maintains relationship between slots and workers
     def copy(self):
         white = deepcopy(self.white_player)
         blue = deepcopy(self.blue_player)
         board = deepcopy(self.board)
-        turn = deepcopy(self.curr_turn)
+        turn = deepcopy(self.get_turn())
 
         # copies all the individual slots
         for i in range(len(self.board.slots)):
@@ -55,7 +55,7 @@ class Game:
         return Game(board, white, blue, turn)
 
     def get_turn(self):
-        return self.curr_turn
+        return self._curr_turn
 
     def move(self, worker_letter, direction_str):
         # determine which worker is moving
@@ -177,10 +177,10 @@ class Player:
     def __init__(self, color, board):
         self.color = color
         self.possible_moves = []
+        self.workers = []
 
         # initialize workers
         if color == "w":
-            self.workers = []
             w1 = Worker("A", board.slots[3][1])
             self.workers.append(w1)
             board.slots[3][1].worker = w1
@@ -188,7 +188,6 @@ class Player:
             self.workers.append(w2)
             board.slots[1][3].worker = w2
         else:
-            self.workers = []
             w1 = Worker("Y", board.slots[1][1])
             self.workers.append(w1)
             board.slots[1][1].worker = w1
